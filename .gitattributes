@@ -1,0 +1,16 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have CRLF line endings on checkout.
+/data/*.txt text eol=lf
+/release/*.cfg text eol=lf
+*.sh text eol=lf
+
+#
+## These files are binary and should be left untouched
+#
+
+# (binary is a macro for -text -diff)
+*.mpq binary
+*.dll binary
+*.exe binary
