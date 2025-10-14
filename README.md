@@ -23,3 +23,6 @@ Yes that's the point
 
 ## Can I use it online?
 I don't (and don't plan to) play online so I don't know; from what I've heard you won't be able to connect due to hash mismatch of the dll (or the dll will be overwritten with the offical one). I've also put zero effort in making this undetectable, so you'll probably be banned very quickly.
+
+## Can you update it so that it works on Season X Patch Y?
+No, unless I also plan on playing it. Do it yourself otherwise.
