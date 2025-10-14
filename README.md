@@ -13,7 +13,7 @@ Compile it yourself with Visual Studio, then replace BH.dll in ProjectD2 directo
 Download source code, open .sln in Visual Studio. Run build. If successful, compiled library will be in /Debug (or wherever VS spits out the file).
 
 ## Limitations
-- to reveal maps on Hell, zone into one and press reveal, this takes longer that act reveal as maps are more complex
+- to reveal maps on Hell, zone into one and press reveal, this takes longer than act reveal as maps are more complex
 - if you try to reveal maps on difficulties other than Hell, only the map you're currently on will be revealed (to my knowledge this only applies to pvp maps)
 - map id 157 (Pvp Map; desert arena, from Akara) and 161 (Necropolis Jungle) can't be revealed as they crash the game for some reason on reveal
 - shrines' and other objects' markers disappear from the map after leaving the game, do reveal again to restore them for the current game
