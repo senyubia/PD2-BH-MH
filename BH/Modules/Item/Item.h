@@ -110,7 +110,9 @@ void PermShowItemsPatch4_ASM();
 
 int CreateUnitItemInfo(UnitItemInfo* uInfo, UnitAny* item);
 void __stdcall GetItemFromPacket_NewGround(px9c* packet);
+void __stdcall GetItemFromPacket_DropToGround(px9c* packet);
 void __stdcall GetItemFromPacket_OldGround(px9c* packet);
+void __stdcall GetItemFromPacket_PutInContainer(px9c* pPacket);
 int ItemGetCorruptor(UnitAny* pItem, int nStat);
 BOOL StatIsCorrupted(int nStat, int nCorruptor);
 
@@ -130,7 +132,7 @@ bool IsInitialized();
 
 // Item attributes from ItemTypes.txt and Weapon/Armor/Misc.txt
 struct ItemAttributes {
-	std::string name;			// Only used in Item Drop/Item Close Notifications. Can delete
+	std::string name;
 	WORD category;
 	BYTE width;					// Delete. Inventory related, which is unnecessary
 	BYTE height;				// Delete. Inventory related, which is unnecessary

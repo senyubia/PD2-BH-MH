@@ -1,6 +1,7 @@
 ﻿#include "ItemDisplay.h"
 #include "Item.h"
 #include "../../Drawing/Stats/StatsDisplay.h"
+#include "../../D2Helpers.h"
 #include <cctype>
 #include <vector>
 #include <string>
@@ -357,6 +358,16 @@ enum AttributeFlagTypes
 	ITEMFLAG_MISC
 };
 
+enum LocationFlagTypes
+{
+	LOCATIONFLAG_EQUIPPED,
+	LOCATIONFLAG_MERCEQUIPPED,
+	LOCATIONFLAG_INVENTORY,
+	LOCATIONFLAG_CUBE,
+	LOCATIONFLAG_STASH,
+	LOCATIONFLAG_GROUND
+};
+
 enum Operation
 {
 	EQUAL,
@@ -384,6 +395,7 @@ enum FilterCondition
 	COND_DRUID,
 	COND_ASSASSIN,
 	COND_CRAFTALVL,
+	COND_REROLLALVL,
 	COND_PREFIX,
 	COND_SUFFIX,
 	COND_AUTOMOD,
@@ -460,8 +472,17 @@ enum FilterCondition
 	COND_SIN,
 	COND_SOR,
 	COND_ZON,
+	COND_MISC,
+	COND_JEWELRY,
+	COND_CHARM,
+	COND_QUIVER,
 	COND_SHOP,
 	COND_EQUIPPED,
+	COND_MERC,
+	COND_INVENTORY,
+	COND_CUBE,
+	COND_STASH,
+	COND_GROUND,
 	COND_1H,
 	COND_2H,
 	COND_AXE,
@@ -490,9 +511,13 @@ enum FilterCondition
 	COND_STAT,
 	COND_CHARSTAT,
 	COND_MULTI,
+	COND_BUYPRICE,
+	COND_SELLPRICE,
 	COND_PRICE,
 	COND_ITEMCODE,
 	COND_ADD,
+	COND_TRUE,
+	COND_FALSE,
 
 	COND_NULL
 };
@@ -503,6 +528,8 @@ std::map<std::string, FilterCondition> condition_map =
 	{"&&", COND_AND},
 	{"OR", COND_OR},
 	{"||", COND_OR},
+	{"TRUE", COND_TRUE},
+	{"FALSE", COND_FALSE},
 	{"ETH", COND_ETH},
 	{"SOCK", COND_SOCK},
 	{"SOCKETS", COND_SOCK},
@@ -518,6 +545,7 @@ std::map<std::string, FilterCondition> condition_map =
 	{"DRUID", COND_DRUID},
 	{"ASSASSIN", COND_ASSASSIN},
 	{"CRAFTALVL", COND_CRAFTALVL},
+	{"REROLLALVL", COND_REROLLALVL},
 	{"PREFIX", COND_PREFIX},
 	{"SUFFIX", COND_SUFFIX},
 	{"AUTOMOD", COND_AUTOMOD},
@@ -595,8 +623,17 @@ std::map<std::string, FilterCondition> condition_map =
 	{"SIN", COND_SIN},
 	{"SOR", COND_SOR},
 	{"ZON", COND_ZON},
+	{"MISC", COND_MISC},
+	{"JEWELRY", COND_JEWELRY},
+	{"CHARM", COND_CHARM},
+	{"QUIVER", COND_QUIVER},
 	{"SHOP", COND_SHOP},
 	{"EQUIPPED", COND_EQUIPPED},
+	{"MERC", COND_MERC},
+	{"CUBE", COND_CUBE},
+	{"INVENTORY", COND_INVENTORY},
+	{"STASH", COND_STASH},
+	{"GROUND", COND_GROUND},
 	{"1H", COND_1H},
 	{"2H", COND_2H},
 	{"AXE", COND_AXE},
@@ -644,6 +681,8 @@ std::map<std::string, FilterCondition> condition_map =
 	{"WP12", COND_WAND},
 	{"WP13", COND_SCEPTER},
 	{"ALLSK", COND_ALLSK},
+	{"BUYPRICE", COND_BUYPRICE},
+	{"SELLPRICE", COND_PRICE},
 	{"PRICE", COND_PRICE},
 	// These have a number as part of the key, handled separately
 	//{"SK", COND_SK},
@@ -744,6 +783,24 @@ int ShopNPCs[] = {
 	NPCID_Anya		// Act 5
 };
 
+int GetShopPrice(UnitAny* pPlayer, UnitAny* pItem, int nTransactionType)
+{
+	int nNpcId = NPCID_Malah;
+	if (nTransactionType == TRANSACTIONTYPE_BUY)
+	{
+		UnitAny* pVendor = D2CLIENT_GetCurrentInteractingNPC();
+		if (pVendor)
+		{
+			if (find(begin(ShopNPCs), end(ShopNPCs), pVendor->dwTxtFileNo) != end(ShopNPCs))
+			{
+				nNpcId = pVendor->dwTxtFileNo;
+			}
+		}
+	}
+
+	return D2COMMON_GetItemPrice(pPlayer, pItem, D2CLIENT_GetDifficulty(), (DWORD)D2CLIENT_GetQuestInfo(), nNpcId, nTransactionType);
+}
+
 char* GemLevels[] = {
 	"NONE",
 	"Chipped",
@@ -813,6 +870,8 @@ struct ReplacementSpec {
 	static string ReplaceConst(ReplaceContext& ctx, const ReplacementValue& val);
 	// %NAME%
 	static string ReplaceName(ReplaceContext& ctx, const ReplacementValue& val);
+	// %BASENAME%
+	static string ReplaceBaseName(ReplaceContext& ctx, const ReplacementValue& val);
 	// %SOCKETS%
 	static string ReplaceSockets(ReplaceContext& ctx, const ReplacementValue& val);
 	// %RUNENUM%
@@ -829,6 +888,8 @@ struct ReplacementSpec {
 	static string ReplaceAffixLevel(ReplaceContext& ctx, const ReplacementValue& val);
 	// %CRAFTALVL%
 	static string ReplaceCraftLevel(ReplaceContext& ctx, const ReplacementValue& val);
+	// %REROLLALVL%
+	static string ReplaceRerollLevel(ReplaceContext& ctx, const ReplacementValue& val);
 	// %LVLREQ%
 	static string ReplaceLevelRequirement(ReplaceContext& ctx, const ReplacementValue& val);
 	// %WPNSPD%
@@ -837,6 +898,8 @@ struct ReplacementSpec {
 	static string ReplaceRange(ReplaceContext& ctx, const ReplacementValue& val);
 	// %CODE%
 	static string ReplaceCode(ReplaceContext& ctx, const ReplacementValue& val);
+	// %BUYPRICE%
+	static string ReplaceBuyPrice(ReplaceContext& ctx, const ReplacementValue& val);
 	// %PRICE%
 	static string ReplacePrice(ReplaceContext& ctx, const ReplacementValue& val);
 	// %QTY%
@@ -876,6 +939,7 @@ struct ReplacementSpec {
 unordered_map<string, ReplacementSpec> ReplacementMap = {
 	// STATIC
 	{ "NAME", { 0, ReplacementSpec::ReplaceName } },
+	{ "BASENAME", { 0, ReplacementSpec::ReplaceBaseName } },
 	{ "SOCKETS", { 0, ReplacementSpec::ReplaceSockets } },
 	{ "RUNENUM", { 0, ReplacementSpec::ReplaceRuneNumber } },
 	{ "RUNENAME", { 0, ReplacementSpec::ReplaceRuneName } },
@@ -884,6 +948,7 @@ unordered_map<string, ReplacementSpec> ReplacementMap = {
 	{ "ILVL", { 0, ReplacementSpec::ReplaceItemLevel } },
 	{ "ALVL", { 0, ReplacementSpec::ReplaceAffixLevel } },
 	{ "CRAFTALVL", { 0, ReplacementSpec::ReplaceCraftLevel } },
+	{ "REROLLALVL", {0, ReplacementSpec::ReplaceRerollLevel }},
 	{ "LVLREQ", { 0, ReplacementSpec::ReplaceLevelRequirement } },
 	{ "WPNSPD", { 0, ReplacementSpec::ReplaceWeaponSpeed } },
 	{ "RANGE", { 0, ReplacementSpec::ReplaceRange } },
@@ -892,6 +957,8 @@ unordered_map<string, ReplacementSpec> ReplacementMap = {
 	{ "LBRACE", { 0, ReplacementSpec::ReplaceBindString("{") } },
 	// %RBRACE%
 	{ "RBRACE", { 0, ReplacementSpec::ReplaceBindString("}") } },
+	{ "BUYPRICE", { 0, ReplacementSpec::ReplaceBuyPrice } },
+	{ "SELLPRICE", { 0, ReplacementSpec::ReplacePrice } },
 	{ "PRICE", { 0, ReplacementSpec::ReplacePrice } },
 	{ "QTY", { 0, ReplacementSpec::ReplaceQuantity } },
 	{ "RES", { 0, ReplacementSpec::ReplaceAllResist } },
@@ -1049,6 +1116,15 @@ string ReplacementSpec::ReplaceName(ReplaceContext& ctx, const ReplacementValue&
 	return ctx.name;
 }
 
+string ReplacementSpec::ReplaceBaseName(ReplaceContext& ctx, const ReplacementValue& val)
+{
+	if (ctx.info == nullptr || ctx.info->attrs == nullptr) {
+		return "";
+	}
+
+	return MaybeStripColorPrefix(ctx.info->attrs->name);
+}
+
 string ReplacementSpec::ReplaceSockets(ReplaceContext& ctx, const ReplacementValue& val)
 {
 	return NameVarSockets(ctx.info);
@@ -1089,6 +1165,11 @@ string ReplacementSpec::ReplaceCraftLevel(ReplaceContext& ctx, const Replacement
 	return NameVarCraftAlvl(ctx.info);
 }
 
+string ReplacementSpec::ReplaceRerollLevel(ReplaceContext& ctx, const ReplacementValue& val)
+{
+	return NameVarRerollAlvl(ctx.info);
+}
+
 string ReplacementSpec::ReplaceLevelRequirement(ReplaceContext& ctx, const ReplacementValue& val)
 {
 	return NameVarLevelReq(ctx.info);
@@ -1107,6 +1188,11 @@ string ReplacementSpec::ReplaceRange(ReplaceContext& ctx, const ReplacementValue
 string ReplacementSpec::ReplaceCode(ReplaceContext& ctx, const ReplacementValue& val)
 {
 	return ctx.info->itemCode;
+}
+
+string ReplacementSpec::ReplaceBuyPrice(ReplaceContext& ctx, const ReplacementValue& val)
+{
+	return NameVarBuyValue(ctx.info, ctx.text);
 }
 
 string ReplacementSpec::ReplacePrice(ReplaceContext& ctx, const ReplacementValue& val)
@@ -1504,6 +1590,14 @@ string NameVarCraftAlvl(UnitItemInfo* uInfo)
 	return craftalvl;
 }
 
+string NameVarRerollAlvl(UnitItemInfo* uInfo)
+{
+	char alvl[4] = "0";
+	int reroll_alvl = ComputeRerollAffixLevel(uInfo);
+	sprintf_s(alvl, "%d", reroll_alvl);
+	return alvl;
+}
+
 string NameVarLevelReq(UnitItemInfo* uInfo)
 {
 	char lvlreq[4] = "0";
@@ -1525,13 +1619,27 @@ string NameVarRangeAdder(ItemsTxt* itemTxt)
 	return rangeadder;
 }
 
+string NameVarBuyValue(UnitItemInfo* uInfo,
+	ItemsTxt* itemTxt)
+{
+	char sellvalue[16] = "";
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	if (pUnit && itemTxt->bquest == 0)
+	{
+		sprintf_s(sellvalue, "%d", GetShopPrice(pUnit, uInfo->item, TRANSACTIONTYPE_BUY));
+	}
+	return sellvalue;
+}
+
 string NameVarSellValue(UnitItemInfo* uInfo,
 	ItemsTxt* itemTxt)
 {
 	char sellvalue[16] = "";
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (pUnit && itemTxt->bquest == 0)
-		sprintf_s(sellvalue, "%d", D2COMMON_GetItemPrice(pUnit, uInfo->item, D2CLIENT_GetDifficulty(), (DWORD)D2CLIENT_GetQuestInfo(), 0x201, 1));
+	{
+		sprintf_s(sellvalue, "%d", GetShopPrice(pUnit, uInfo->item, TRANSACTIONTYPE_SELL));
+	}
 	return sellvalue;
 }
 
@@ -2285,6 +2393,12 @@ void Condition::BuildConditions(vector<Condition*>& conditions,
 	case COND_OR:
 		Condition::AddNonOperand(conditions, new OrOperator());
 		break;
+	case COND_TRUE:
+		Condition::AddOperand(conditions, new TrueCondition());
+		break;
+	case COND_FALSE:
+		Condition::AddOperand(conditions, new FalseCondition());
+		break;
 	case COND_ETH:
 		Condition::AddOperand(conditions, new FlagsCondition(ITEM_ETHEREAL));
 		break;
@@ -2326,6 +2440,9 @@ void Condition::BuildConditions(vector<Condition*>& conditions,
 		break;
 	case COND_CRAFTALVL:
 		Condition::AddOperand(conditions, new CraftLevelCondition(operation, value, value2));
+		break;
+	case COND_REROLLALVL:
+		Condition::AddOperand(conditions, new RerollLevelCondition(operation, value, value2));
 		break;
 	case COND_PREFIX:
 		Condition::AddOperand(conditions, new MagicPrefixCondition(operation, value, value2));
@@ -2555,11 +2672,38 @@ void Condition::BuildConditions(vector<Condition*>& conditions,
 	case COND_ZON:
 		Condition::AddOperand(conditions, new ItemGroupCondition(ITEM_GROUP_AMAZON_WEAPON, ITEMFLAG_WEAPON));
 		break;
+	case COND_MISC:
+		Condition::AddOperand(conditions, new ItemGroupCondition(ITEM_GROUP_ALLMISC, ITEMFLAG_MISC));
+		break;
+	case COND_JEWELRY:
+		Condition::AddOperand(conditions, new ItemGroupCondition(ITEM_GROUP_JEWELRY, ITEMFLAG_MISC));
+		break;
+	case COND_CHARM:
+		Condition::AddOperand(conditions, new ItemGroupCondition(ITEM_GROUP_CHARM, ITEMFLAG_MISC));
+		break;
+	case COND_QUIVER:
+		Condition::AddOperand(conditions, new ItemGroupCondition(ITEM_GROUP_QUIVER, ITEMFLAG_MISC));
+		break;
 	case COND_SHOP:
 		Condition::AddOperand(conditions, new ShopCondition());
 		break;
 	case COND_EQUIPPED:
-		Condition::AddOperand(conditions, new EquippedCondition());
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_EQUIPPED));
+		break;
+	case COND_MERC:
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_MERCEQUIPPED));
+		break;
+	case COND_INVENTORY:
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_INVENTORY));
+		break;
+	case COND_CUBE:
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_CUBE));
+		break;
+	case COND_STASH:
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_STASH));
+		break;
+	case COND_GROUND:
+		Condition::AddOperand(conditions, new LocationCondition(LOCATIONFLAG_GROUND));
 		break;
 	case COND_1H:
 		Condition::AddOperand(conditions, new OneHandedCondition());
@@ -2660,8 +2804,11 @@ void Condition::BuildConditions(vector<Condition*>& conditions,
 			Condition::AddOperand(conditions, new ItemStatCondition(stat1, stat2, operation, value, value2));
 		}
 		break;
+	case COND_BUYPRICE:
+		Condition::AddOperand(conditions, new ItemPriceCondition(operation, value, value2, TRANSACTIONTYPE_BUY));
+		break;
 	case COND_PRICE:
-		Condition::AddOperand(conditions, new ItemPriceCondition(operation, value, value2));
+		Condition::AddOperand(conditions, new ItemPriceCondition(operation, value, value2, TRANSACTIONTYPE_SELL));
 		break;
 	case COND_ITEMCODE:
 		Condition::AddOperand(conditions, new ItemCodeCondition(key.substr(0, 4).c_str()));
@@ -2885,6 +3032,46 @@ bool CraftLevelCondition::EvaluateInternal(UnitItemInfo* uInfo,
 	return IntegerCompare(craft_alvl, operation, craftLevel, craftLevel2);
 }
 
+bool RerollLevelCondition::EvaluateInternal(UnitItemInfo* uInfo,
+	Condition* arg1,
+	Condition* arg2)
+{
+	int rerollAlvl = ComputeRerollAffixLevel(uInfo);
+	return IntegerCompare(rerollAlvl, operation_, rerollLevel1_, rerollLevel2_);
+}
+
+BYTE ComputeRerollAffixLevel(UnitItemInfo* uInfo) {
+	// Maps cannot be rerolled using the standard recipe.
+	if (uInfo->attrs->miscFlags & ITEM_GROUP_MAP) {
+		return 0;
+	}
+
+	// Corrupted items cannot be rerolled.
+	if (D2COMMON_GetUnitStat(uInfo->item, STAT_CORRUPTED, 0) > 0) {
+		return 0;
+	}
+
+	BYTE ilvl = uInfo->item->pItemData->dwItemLevel;
+	BYTE reroll_ilvl;
+
+	switch (uInfo->item->pItemData->dwQuality) {
+		case ITEM_QUALITY_RARE:	{
+			BYTE clvl = D2COMMON_GetUnitStat(D2CLIENT_GetPlayerUnit(), STAT_LEVEL, 0);
+			reroll_ilvl = (int)(0.4 * ilvl) + (int)(0.4 * clvl);
+			break;
+		}
+		case ITEM_QUALITY_MAGIC:
+			reroll_ilvl = ilvl;
+			break;
+		default:
+			return 0;
+	}
+
+	BYTE qlvl = uInfo->attrs->qualityLevel;
+	BYTE mlvl = uInfo->attrs->magicLevel;
+	return GetAffixLevel(reroll_ilvl, qlvl, mlvl);
+}
+
 bool MagicPrefixCondition::EvaluateInternal(UnitItemInfo* uInfo,
 	Condition* arg1,
 	Condition* arg2)
@@ -3086,17 +3273,67 @@ bool FoolsCondition::EvaluateInternal(UnitItemInfo* uInfo,
 	return IntegerCompare(value, (BYTE)EQUAL, 3);
 }
 
-bool EquippedCondition::EvaluateInternal(UnitItemInfo* uInfo,
+bool LocationCondition::EvaluateInternal(UnitItemInfo* uInfo,
 	Condition* arg1,
 	Condition* arg2)
 {
-	bool is_equipped = false;
-	if (uInfo->item->pItemData->BodyLocation > 0 && uInfo->item->pItemData->ItemLocation == STORAGE_NULL)
+	bool has_location = false;
+	UnitAny* pMerc = NULL;
+	if (uInfo->item && uInfo->item->pItemData)
 	{
-		is_equipped = true;
+		ItemData* pItemData = uInfo->item->pItemData;
+		switch (location)
+		{
+		case LOCATIONFLAG_EQUIPPED:
+			if (pItemData->ItemLocation == STORAGE_NULL &&
+				pItemData->BodyLocation > 0 &&
+				pItemData->pOwnerInventory && pItemData->pOwnerInventory->pOwner == D2CLIENT_GetPlayerUnit())
+			{
+				has_location = true;
+			}
+			break;
+		case LOCATIONFLAG_MERCEQUIPPED:
+			pMerc = GetClientMercUnit();
+			if (pMerc &&
+				pItemData->ItemLocation == STORAGE_NULL &&
+				pItemData->BodyLocation > 0 &&
+				pItemData->pOwnerInventory && pItemData->pOwnerInventory->pOwner == pMerc)
+			{
+				has_location = true;
+			}
+			break;
+		case LOCATIONFLAG_INVENTORY:
+			if (pItemData->ItemLocation == STORAGE_INVENTORY &&
+				uInfo->item->dwMode == ITEM_MODE_INV_STASH_CUBE_STORE &&
+				pItemData->pOwnerInventory && pItemData->pOwnerInventory->pOwner == D2CLIENT_GetPlayerUnit())
+			{
+				has_location = true;
+			}
+			break;
+		case LOCATIONFLAG_CUBE:
+			if (pItemData->ItemLocation == STORAGE_CUBE &&
+				pItemData->pOwnerInventory && pItemData->pOwnerInventory->pOwner == D2CLIENT_GetPlayerUnit())
+			{
+				has_location = true;
+			}
+			break;
+		case LOCATIONFLAG_STASH:
+			if (pItemData->ItemLocation == STORAGE_STASH &&
+				pItemData->pOwnerInventory && pItemData->pOwnerInventory->pOwner == D2CLIENT_GetPlayerUnit())
+			{
+				has_location = true;
+			}
+			break;
+		case LOCATIONFLAG_GROUND:
+			if (uInfo->item->dwMode == ITEM_MODE_ON_GROUND || uInfo->item->dwMode == ITEM_MODE_BEING_DROPPED)
+			{
+				has_location = true;
+			}
+			break;
+		}
 	}
 
-	return IntegerCompare(is_equipped, (BYTE)EQUAL, 1);
+	return IntegerCompare(has_location, (BYTE)EQUAL, 1);
 }
 
 bool ShopCondition::EvaluateInternal(UnitItemInfo* uInfo,
@@ -3275,7 +3512,8 @@ bool ItemPriceCondition::EvaluateInternal(UnitItemInfo* uInfo,
 	Condition* arg1,
 	Condition* arg2)
 {
-	return IntegerCompare(D2COMMON_GetItemPrice(D2CLIENT_GetPlayerUnit(), uInfo->item, D2CLIENT_GetDifficulty(), (DWORD)D2CLIENT_GetQuestInfo(), 0x201, 1), operation, targetStat, targetStat2);
+	int nPrice = GetShopPrice(D2CLIENT_GetPlayerUnit(), uInfo->item, nTransactionType);
+	return IntegerCompare(nPrice, operation, targetStat, targetStat2);
 }
 
 bool ResistAllCondition::EvaluateInternal(UnitItemInfo* uInfo,
@@ -3393,4 +3631,3 @@ void HandleUnknownItemCode(char* code,
 		UnknownItemCodes[code] = 1;
 	}
 }
-

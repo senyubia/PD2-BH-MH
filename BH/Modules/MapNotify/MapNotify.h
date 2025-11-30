@@ -21,8 +21,7 @@ private:
 	int mbMonColor;
 	unsigned int maxGhostSelection;
 	std::map<string, unsigned int> TextColorMap;
-
-	bool badLevel[255];
+	Drawing::UITab* settingsTab;
 
 public:
 	MapNotify();
@@ -41,10 +40,4 @@ public:
 
 	void OnKey(bool up, BYTE key, LPARAM lParam, bool* block);
 
-	void RevealAct(int act);
-	void RevealLevel(Level* level);
-	void RevealRoom(Room2* room);
-
-	static Level* GetLevel(Act* pAct, int level);
-	static AutomapLayer* InitLayer(int level);
 };

@@ -2,6 +2,7 @@ project(BH)
 
 set(SOURCE_FILES "AsyncDrawBuffer.cpp"
                  "BH.cpp"
+                 "BitReader.cpp"
                  "Common.cpp"
                  "Config.cpp"
                  "D2Handlers.cpp"
@@ -11,8 +12,11 @@ set(SOURCE_FILES "AsyncDrawBuffer.cpp"
                  "D2Version.cpp"
                  "DllMain.cpp"
                  "JSONObject.cpp"
+                 "MPQInit.cpp"
+                 "MPQReader.cpp"
                  "Mustache.cpp"
                  "Patch.cpp"
+                 "TableReader.cpp"
                  "Task.cpp")
 
 set(MODULE_SOURCES "Modules/Module.cpp"
@@ -22,7 +26,7 @@ set(MODULE_SOURCES "Modules/Module.cpp"
                    "Modules/Gamefilter/Gamefilter.cpp"
                    "Modules/Item/Item.cpp"
                    "Modules/Item/ItemDisplay.cpp"
-                   "Modules/MapNotify/MapNotify.cpp"
+                   "Modules/ItemMover/ItemMover.cpp"
                    "Modules/Party/Party.cpp"
                    "Modules/ScreenInfo/ScreenInfo.cpp"
                    "Modules/StashExport/StashExport.cpp")

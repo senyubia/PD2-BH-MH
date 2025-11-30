@@ -125,7 +125,9 @@ Patch* permShowItems5 = new Patch(Call, D2CLIENT, { 0xA6BA3, 0x63443 }, (int)Per
 Patch* itemDropSoundIntercept1 = new Patch(NOP, D2CLIENT, { 0x84C38 }, 0, 5);
 
 Patch* newGroundIntercept = new Patch(Call, D2CLIENT, { 0xAE0DA }, (int)D2CLIENT_GetItemFromPacketIntercept_NewGround_STUB, 5);
+Patch* dropToGroundIntercept = new Patch(Call, D2CLIENT, { 0xAE0F8 }, (int)D2CLIENT_ItemPacketBuildAction2_DropToGround_INTERCEPT_STUB, 5);
 Patch* oldGroundIntercept = new Patch(Call, D2CLIENT, { 0xAE108 }, (int)GetItemFromPacket_OldGround, 5);
+Patch* putInContainerIntercept = new Patch(Call, D2CLIENT, { 0xAE117 }, (int)D2CLIENT_ItemPacketBuildAction4_PutInContainer_INTERCEPT_STUB, 5);
 
 using namespace Drawing;
 
@@ -146,6 +148,8 @@ void Item::OnLoad() {
 
 	newGroundIntercept->Install();
 	oldGroundIntercept->Install();
+	dropToGroundIntercept->Install();
+	putInContainerIntercept->Install();
 
 	itemPropertiesPatch->Install();
 	itemPropertyStringDamagePatch->Install();
@@ -503,11 +507,25 @@ void GetMiscAttributes()
 		BYTE stackable = pMisc->bstackable > 0 ? pMisc->bstackable : 0;
 		BYTE useable = pMisc->buseable > 0 ? pMisc->buseable : 0;
 		BYTE throwable = throwableMap[pMisc->nType] > 0 ? throwableMap[pMisc->nType] : 0;
-		unsigned int miscFlags = 0;
+		unsigned int baseFlags = 0;
+		unsigned int miscFlags = ITEM_GROUP_ALLMISC;
 
 		std::set<WORD> ancestorTypes;
 		FindAncestorTypes(pMisc->nType, ancestorTypes, parentMap1, parentMap2);
 		FindAncestorTypes(pMisc->wtype2, ancestorTypes, parentMap1, parentMap2);
+
+		if (pMisc->dwcode == pMisc->dwultracode)
+		{
+			baseFlags |= ITEM_GROUP_ELITE;
+		}
+		else if (pMisc->dwcode == pMisc->dwubercode)
+		{
+			baseFlags |= ITEM_GROUP_EXCEPTIONAL;
+		}
+		else
+		{
+			baseFlags |= ITEM_GROUP_NORMAL;
+		}
 
 		if (ancestorTypes.find(ITEM_TYPE_RUNE) != ancestorTypes.end() || ancestorTypes.find(ITEM_TYPE_STACK_RUNE) != ancestorTypes.end()) {
 			miscFlags |= ITEM_GROUP_RUNE;
@@ -575,7 +593,7 @@ void GetMiscAttributes()
 		attrs->stackable = stackable;
 		attrs->useable = useable;
 		attrs->throwable = throwable;
-		attrs->baseFlags = 0;
+		attrs->baseFlags = baseFlags;
 		attrs->weaponFlags = 0;
 		attrs->armorFlags = 0;
 		attrs->miscFlags = miscFlags;
@@ -780,6 +798,8 @@ void Item::OnUnload() {
 	itemDropSoundIntercept1->Remove();
 	newGroundIntercept->Remove();
 	oldGroundIntercept->Remove();
+	dropToGroundIntercept->Remove();
+	putInContainerIntercept->Remove();
 	ItemDisplay::UninitializeItemRules();
 }
 
@@ -977,6 +997,24 @@ void __stdcall GetItemFromPacket_NewGround(px9c* pPacket)
 	return;
 }
 
+void __stdcall GetItemFromPacket_DropToGround(px9c* pPacket)
+{
+	D2CLIENT_ItemPacketBuildAction2_DropToGround_STUB(pPacket);
+	/*
+	UnitAny* pItem = D2CLIENT_FindServerSideUnit(pPacket->nItemId, UNIT_ITEM);
+	UnitItemInfo uInfo;
+	if (!CreateUnitItemInfo(&uInfo, pItem))
+	{
+		Item::ProcessItemPacketFilterRules(&uInfo, pPacket);
+	}
+	else
+	{
+		HandleUnknownItemCode(uInfo.itemCode, "from packet");
+	}
+	*/
+	return;
+}
+
 // Path when an item that was previously dropped comes into view
 void __stdcall GetItemFromPacket_OldGround(px9c* pPacket)
 {
@@ -992,6 +1030,24 @@ void __stdcall GetItemFromPacket_OldGround(px9c* pPacket)
 		HandleUnknownItemCode(uInfo.itemCode, "from packet");
 	}
 
+	return;
+}
+
+void __stdcall GetItemFromPacket_PutInContainer(px9c* pPacket)
+{
+	D2CLIENT_ItemPacketBuildAction4_PutInContainer_STUB(pPacket);
+	/*
+	UnitAny* pItem = D2CLIENT_FindServerSideUnit(pPacket->nItemId, UNIT_ITEM);
+	UnitItemInfo uInfo;
+	if (!CreateUnitItemInfo(&uInfo, pItem))
+	{
+		Item::ProcessItemPacketFilterRules(&uInfo, pPacket);
+	}
+	else
+	{
+		HandleUnknownItemCode(uInfo.itemCode, "from packet");
+	}
+	*/
 	return;
 }
 

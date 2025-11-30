@@ -187,6 +187,7 @@
     <ClCompile Include="Modules\GameSettings\GameSettings.cpp" />
     <ClCompile Include="Modules\Item\Item.cpp" />
     <ClCompile Include="Modules\Item\ItemDisplay.cpp" />
+    <ClCompile Include="Modules\Maphack\Maphack.cpp" />
     <ClCompile Include="Modules\MapNotify\MapNotify.cpp" />
     <ClCompile Include="Modules\Module.cpp" />
     <ClCompile Include="Modules\ModuleManager.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="Modules\GameSettings\GameSettings.h" />
     <ClInclude Include="Modules\Item\Item.h" />
     <ClInclude Include="Modules\Item\ItemDisplay.h" />
+    <ClInclude Include="Modules\Maphack\Maphack.h" />
     <ClInclude Include="Modules\MapNotify\MapNotify.h" />
     <ClInclude Include="Modules\Module.h" />
     <ClInclude Include="Modules\ModuleManager.h" />
