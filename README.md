@@ -1,7 +1,7 @@
 # PD2 BH with MapHack
 
 ## What is it
-Project Diablo 2's version of BH with added MapHack capability. Tested on S12 patch 2. I didn't test it on other patches and don't plan to.
+Project Diablo 2's version of BH with added MapHack capability. Tested on S13 patch 2. I didn't test it on other patches and don't plan to.
 
 ## How
 I've added map reveal code from original slashdiablo's BH and made it run on keypress in MapNotify module.
