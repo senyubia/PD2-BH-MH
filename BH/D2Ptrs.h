@@ -257,6 +257,7 @@ VARPTR(D2CLIENT, WeaponSpeedTable, int*, 0xE0F78)
 VARPTR(D2CLIENT, WeaponSpeedModTable, int*, 0xE10E0)
 
 VARPTR(D2CLIENT, MapId, DWORD, 0x11C310)
+VARPTR(D2CLIENT, Music_CurrentLevelId, DWORD, 0x11C34C)
 VARPTR(D2CLIENT, ScreenCovered, DWORD, 0x11C414) // 1 = Right Side Covered 2 = Left Side Covered 3 = Both Sides Covered
 
 
@@ -351,6 +352,7 @@ FUNCPTR(D2COMMON, LoadAct, Act* __stdcall, (DWORD ActNumber, DWORD MapId, DWORD 
 FUNCPTR(D2COMMON, GetLevelText, LevelText* __stdcall, (DWORD levelno), -10014, -10142)
 FUNCPTR(D2COMMON, GetObjectText, ObjectTxt* __stdcall, (DWORD objno), -10688, -10319)
 FUNCPTR(D2COMMON, GetItemText, ItemsTxt* __stdcall, (DWORD dwItemNo), -10695, -10994)
+FUNCPTR(D2COMMON, GetItemTextFromItemCode, ItemsTxt* __stdcall, (DWORD dwItemNo, int* pItemId), -10450)
 
 FUNCPTR(D2COMMON, GetLayer, AutomapLayer2* __fastcall, (DWORD dwLevelNo), -10749, -10087)
 FUNCPTR(D2COMMON, GetLevel, Level* __fastcall, (ActMisc* pMisc, DWORD dwLevelNo), -10207, -10287)
@@ -368,6 +370,13 @@ FUNCPTR(D2COMMON, 10535_DATATBLS_GetItemDataTables, D2ItemDataTbl* __stdcall, ()
 FUNCPTR(D2COMMON, 10492_DATATBLS_GetMagicAffixDataTables, D2MagicAffixDataTbl* __stdcall, (), -10492);
 FUNCPTR(D2COMMON, 10365_DATATBLS_GetRareAffixTxtRecord, RareAffixTxt* __stdcall, (int nId), -10365);
 
+FUNCPTR(D2COMMON, 10061_INVENTORY_GetLeftHandWeapon, UnitAny* __stdcall, (Inventory* pInventory), -10061);
+FUNCPTR(D2COMMON, 11139_INVENTORY_GetItemFromBodyLoc, UnitAny* __stdcall, (Inventory* pInventory, int nBodyLoc), -11139);
+ASMPTR(D2COMMON, GetStatsWithIdFromStatlist, 0x382F0);
+FUNCPTR(D2COMMON, 10744_ITEMS_IsMatchingType, BOOL __stdcall, (UnitAny* pItem, int iType), -10744, -10601)
+FUNCPTR(D2COMMON, 11034_ITEMS_CheckItemTypes, BOOL __stdcall, (int nItemType1, int nItemType2), -11034);
+FUNCPTR(D2COMMON, GetStartSkill, Skill* __stdcall, (UnitAny* pUnit), -10947);
+
 FUNCPTR(D2COMMON, CheckUnitCollision, DWORD __stdcall, (UnitAny* pUnitA, UnitAny* pUnitB, DWORD dwBitMask), -10839, -10221)
 FUNCPTR(D2COMMON, GetRoomFromUnit, Room1* __stdcall, (UnitAny* ptUnit), -10331, -10846)
 FUNCPTR(D2COMMON, GetLevelIdFromRoom, int __stdcall, (Room1* pRoom), -10826)
@@ -383,6 +392,7 @@ FUNCPTR(D2COMMON, GetItemFromInventory, UnitAny* __stdcall, (Inventory* inv), -1
 FUNCPTR(D2COMMON, GetNextItemFromInventory, UnitAny* __stdcall, (UnitAny* pItem), -10464, -10879)
 FUNCPTR(D2COMMON, GetItemType, int __stdcall, (UnitAny* pItem), -11088, -10121)
 FUNCPTR(D2COMMON, IsMatchingType, BOOL __stdcall, (UnitAny* pItem, int iType), -10744, -10601)
+FUNCPTR(D2COMMON, GetMaxSockets, BYTE __stdcall, (UnitAny* pItem), -11151)
 
 FUNCPTR(D2COMMON, GetRunesTxt, RunesTxt* __stdcall, (int RecordNo), -10006, -10405)
 FUNCPTR(D2COMMON, GetRunesTxtRecords, int* __stdcall, (void), -11032, -10981)

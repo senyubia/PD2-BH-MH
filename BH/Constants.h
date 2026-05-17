@@ -8,7 +8,7 @@
 #define SETTINGS_SIZE_X 400
 #define SETTINGS_SIZE_Y 366
 
-#define CODE_PAGE 1252 // windows-1252	ANSI Latin 1; Western European (Windows)
+#define CODE_PAGE CP_UTF8 // 65001 - UTF-8: supports all Unicode languages
 
 #define MAX_ITEM_NAME_SIZE 56
 #define MAX_ITEM_TEXT_SIZE 512 // Half of the maximum in-game limit
@@ -70,7 +70,7 @@ enum Font
 #define UI_CHAT_CONSOLE			0x05
 #define UI_UNK					0x06   //auto disabled
 #define UI_UNK_EX				0x07   //auto disabled
-#define UI_NPCMENU				0x08	
+#define UI_NPCMENU				0x08
 #define UI_DIALOG				0x08
 #define UI_ESCMENU_MAIN			0x09
 #define UI_AUTOMAP				0x0A
@@ -458,9 +458,9 @@ enum PetType
 #define STAT_REPLENISHESQUANTITY	253
 #define STAT_INCREASEDSTACKSIZE		254
 #define STAT_FINDITEM				255
-#define STAT_SLASHDAMAGE			256
-#define STAT_SLASHDAMAGEPERCENT		257
-#define STAT_CRUSHDAMAGE			258
+#define STAT_CRITICALSTRIKE_MULTIPLIER 256
+#define STAT_DEADLYSTRIKE_MULTIPLIER 257
+#define STAT_ITEM_CRITICALSTRIKE_CHANCE			258
 #define STAT_CRUSHDAMAGEPERCENT		259
 #define STAT_THRUSTDAMAGE			260
 #define STAT_THRUSTDAMAGEPERCENT	261
@@ -470,7 +470,7 @@ enum PetType
 #define STAT_SLASHDAMAGEABSORBPCT	265
 #define STAT_CRUSHDAMAGEABSORBPCT	266
 #define STAT_THRUSTDAMAGEABSORBPCT	267
-#define STAT_DEFENSEPERTIME			268
+#define STAT_CRUSHINGBLOW_EFFICIENCY	268
 #define STAT_ENHANCEDDEFENSEPERTIME	269
 #define STAT_LIFEPERTIME			270
 #define STAT_MANAPERTIME			271
@@ -1247,7 +1247,7 @@ enum QuestFlags {
 #define ITEM_NEW				0x00002000 // Set when an item first drops
 #define ITEM_ISEAR				0x00010000 // Player's ear
 #define ITEM_STARTITEM			0x00020000 // Start item(1 selling/repair value)
-#define ITEM_COMPACTSAVE		0x00200000 
+#define ITEM_COMPACTSAVE		0x00200000
 #define ITEM_ETHEREAL			0x00400000 // Ethreal
 #define ITEM_PERSONALIZED		0x01000000 // Personalized
 #define ITEM_RUNEWORD			0x04000000 // Runeword
@@ -1372,7 +1372,7 @@ enum UNITFLAGEX
 	UNITFLAGEX_CONVERTING = 0x00000040,       // Set while the cursor is in conversion mode (legacy).
 	UNITFLAGEX_VISIBLE = 0x00000080,       // Unit is within line of sight of the player.
 	UNITFLAGEX_DEACTIVATED = 0x00000100,       // Set for units that have been deactivated by SUNIT_Deactivate.
-	UNITFLAGEX_REACTIVATED = 0x00000200,       // Set for units that have been reactivated by SUNIT_Reactivate.    
+	UNITFLAGEX_REACTIVATED = 0x00000200,       // Set for units that have been reactivated by SUNIT_Reactivate.
 	UNITFLAGEX_OWNED = 0x00000400,       // This unit has an owner stored at pUnit->dwOwnerID and pUnit->eOwnerTOU (usually used by missile, but also set for pets).
 	UNITFLAGEX_POSITIONED = 0x00000800,       // SMESSAGE_SETUNITPOS, bFadeOutScreen = FALSE.
 	UNITFLAGEX_MOVING = 0x00002000,       // Set for critters while they're moving on the client.
@@ -1405,6 +1405,13 @@ enum TransactionTypes
 #define MONSTAT_ALIGN_ENEMY				0x0
 #define MONSTAT_ALIGN_ALLY				0x1
 #define MONSTAT_ALIGN_NEUTRAL			0x2
+
+#define SKILL_JAVELINANDSPEARMASTERY	19
+#define SKILL_SMITE					97
+#define SKILL_ONEHANDMASTERY		128
+#define SKILL_TWOHANDMASTERY		134
+#define SKILL_THROWINGMASTERY		135
+#define SKILL_CLAWANDDAGGERMASTERY	252
 
 // Toggles for GOODSK and GOODCLSK in ItemDisplay
 #define CLASS_SKILLS					0
@@ -1478,6 +1485,15 @@ enum TransactionTypes
 #define ITEM_TYPE_T3_MAP			108
 #define ITEM_TYPE_T4_MAP			109
 
+#define ITEM_TYPE_WEAPON	        45
+#define ITEM_TYPE_MELEE_WEAPON		46
+#define ITEM_TYPE_MISSILE_WEAPON	47
+#define ITEM_TYPE_THROWN_WEAPON		48
+#define	ITEM_TYPE_HAND_TO_HAND		67
+#define	ITEM_TYPE_TWOHANDED_MELEE_WEAPON	114
+#define	ITEM_TYPE_GENERAL_WEAPON	115
+#define	ITEM_TYPE_ONEHANDED_MELEE_WEAPON	116
+
 #define ITEM_TYPE_STACK_FLAWLESS	128
 #define ITEM_TYPE_STACK_PERFECT		129
 #define ITEM_TYPE_STACK_AMETHYST	130
@@ -1501,6 +1517,8 @@ enum TransactionTypes
 #define ITEM_TYPE_PVP_MAP_MOOR		199
 #define ITEM_TYPE_T5_MAP			211
 #define ITEM_TYPE_PVP_MAP_DESERT	227
+
+
 
 enum MinAccrIndex
 {
@@ -1549,7 +1567,7 @@ const std::vector<std::set<int>> ValidCorruptZones =
 	{106, 107}, // City of the Damned + River of Flame
 	{108}, // Chaos Sanctuary
 	{110, 111}, // Bloody Foothills + Frigid Highlands
-	{112, 113, 114}, // Arreat Plateau + Crystalline Passage + Frozen River 
+	{112, 113, 114}, // Arreat Plateau + Crystalline Passage + Frozen River
 	{115, 116, 117}, // Glacial Trail + Drifter Cavern + Frozen Tundra
 	{118, 119}, // Ancient's Way + Icy Cellar
 	{121, 122, 123, 124}, // Nihlathak's Temple

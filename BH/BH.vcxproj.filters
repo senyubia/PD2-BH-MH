@@ -204,6 +204,7 @@
     <ClInclude Include="Modules\GameSettings\GameSettings.h">
       <Filter>Modules\GameSettings</Filter>
     </ClInclude>
+    <ClInclude Include="Formula.h" />
     <ClInclude Include="Modules\Maphack\Maphack.h">
       <Filter>Modules\Maphack</Filter>
     </ClInclude>
@@ -285,7 +286,7 @@
       <UniqueIdentifier>{804cabda-3e31-4dee-bcf5-07cd55094c08}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Maphack">
-      <UniqueIdentifier>{45ebefd0-fccb-4bc2-a019-9d56692f4663}</UniqueIdentifier>
+      <UniqueIdentifier>{7a6728fe-df6b-4b7c-b6ba-2c79f0281cc1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
