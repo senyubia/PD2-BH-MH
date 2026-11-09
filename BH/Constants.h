@@ -938,7 +938,8 @@ enum Type {
 	EXIT_MULTI
 };
 
-#define ITEMFLAG_ALLOCED 0x10000000;
+#define ITEMFLAG_ALLOCED 0x10000000
+#define ITEMFLAG_FAKE_COMPENDIUM_TAB 0x40000000
 
 ///////////////////////////////////////////////////
 // Spell Stats
@@ -1668,4 +1669,5 @@ const int CorruptionMods[][6] = {
 	{STAT_ADDEXPERIENCE, -1, -1, -1, -1, -1},
 	{STAT_VITALITY, STAT_ENERGY, -1, -1, -1, -1},
 	{STAT_MONSTERDEFDUCTPERHIT, -1, -1, -1, -1, -1},
+	{STAT_HALFFREEZEDURATION, -1, -1, -1, -1, -1},
 };
